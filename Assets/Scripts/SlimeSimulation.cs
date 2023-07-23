@@ -12,7 +12,8 @@ public class SlimeSimulation : MonoBehaviour
     // Kernels are annoying to enum as you have to cast enum to int
     public const int simKernel = 0;
 
-    public enum SpawnMode {random, inwardsCircle, outwardsCircle, randomCircle, outwardsPoint, randomPoint};
+    public enum SpawnMode {random, inwardsFullCircle, outwardsFullCircle, randomFullCircle, 
+                           inwardsCircle, outwardsPoint, randomPoint};
 
     // Seb Lague does a [SerializeField, HideInInspector] here. Has to do with saving, but not sure.
     protected RenderTexture trailTexture;
@@ -61,7 +62,7 @@ public class SlimeSimulation : MonoBehaviour
                 dir.x = Random.value - 0.5f;
                 dir.y = Random.value - 0.5f;
 
-            } else if (settings.spawnMode == SpawnMode.inwardsCircle){
+            } else if (settings.spawnMode == SpawnMode.inwardsFullCircle){
 
                 // Particles start in a circle
                 
@@ -77,7 +78,7 @@ public class SlimeSimulation : MonoBehaviour
                 // Particles point inwards
                 dir = Vector2.zero - insideCirc;
 
-            } else if (settings.spawnMode == SpawnMode.outwardsCircle){
+            } else if (settings.spawnMode == SpawnMode.outwardsFullCircle){
 
                 Vector2 insideCirc = (Random.insideUnitCircle * circleRadius);
                 pos.x = insideCirc.x + (settings.width / 2);
@@ -85,12 +86,27 @@ public class SlimeSimulation : MonoBehaviour
                 // Particles point outwards
                 dir = insideCirc - Vector2.zero;
 
-            } else if (settings.spawnMode == SpawnMode.randomCircle){
+            } else if (settings.spawnMode == SpawnMode.randomFullCircle){
 
                 // Particles start in a circle
-                
+                Vector2 insideCirc = (Random.insideUnitCircle * circleRadius);
+                pos.x = insideCirc.x + (settings.width / 2);
+                pos.y = insideCirc.y + (settings.height / 2);
                 // Random direction
+                // Random direction
+                dir.x = Random.value - 0.5f;
+                dir.y = Random.value - 0.5f;
                 
+            } else if (settings.spawnMode == SpawnMode.inwardsCircle){
+                // Note: shows up a little weird but just due to antialiasing 
+                float rad = ((float)i / settings.numAgents) * 2f * Mathf.PI;
+                float cos = Mathf.Cos(rad);
+                float sin = Mathf.Sin(rad);
+                pos.x = cos * circleRadius + (settings.width / 2f);
+                pos.y = sin * circleRadius + (settings.height / 2f);
+
+                dir = Vector2.zero - new Vector2(cos, sin);
+            // TODO: add outwardsCircle and randomCircle
             } else if (settings.spawnMode == SpawnMode.outwardsPoint){
 
                 // Particles start at the center
