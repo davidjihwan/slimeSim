@@ -23,6 +23,9 @@ float sensorOffset;
 void Simulate (uint3 id : SV_DispatchThreadID)
 {
     // TODO: insert actual code here!
+	if (id.x > numAgents){
+		return;
+	}
 	int posX = (int)agents[id.x].position.x;
 	int posY = (int)agents[id.x].position.y;
 	Display[int2(posX, posY)] = 1;

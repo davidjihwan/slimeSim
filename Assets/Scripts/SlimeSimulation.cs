@@ -44,12 +44,11 @@ public class SlimeSimulation : MonoBehaviour
         // Initializing 5 million agents currently takes around 1 second.
         
         Agent[] agents = new Agent[settings.numAgents];
-        int agentsLength = agents.Length;
         float circleRadius = settings.height / 2.5f;
 
         float beforeSec = System.DateTime.Now.Second;
         float beforeMs = System.DateTime.Now.Millisecond;
-        for (int i = 0; i < agentsLength; i++){
+        for (int i = 0; i < settings.numAgents; i++){
             Vector2 pos = new Vector2();
             Vector2 dir = new Vector2();
 
@@ -63,11 +62,11 @@ public class SlimeSimulation : MonoBehaviour
                 dir.Normalize();
             } else if (settings.spawnMode == SpawnMode.inwardsCircle){
                 // Particles start in a circle
-                float rad = (i / agentsLength) * 2 * Mathf.PI;
+                float rad = ((float)i / settings.numAgents) * 2f * Mathf.PI;
                 float cos = Mathf.Cos(rad);
                 float sin = Mathf.Sin(rad);
-                pos.x = cos * circleRadius;
-                pos.y = sin * circleRadius;
+                pos.x = cos * circleRadius + (settings.width / 2);
+                pos.y = sin * circleRadius + (settings.height / 2);
                 // Particles point towards center
                 dir = Vector2.zero - new Vector2(cos, sin);
                 // TODO: check if these are already normalized
@@ -81,6 +80,9 @@ public class SlimeSimulation : MonoBehaviour
                 
                 // Particles point outwards
                 
+            } else {
+                Debug.Log("Unaccounted spawn mode");
+                return;
             }
 
             agents[i].position = pos;
@@ -96,15 +98,17 @@ public class SlimeSimulation : MonoBehaviour
         agentBuffer = new ComputeBuffer(settings.numAgents, stride);
         agentBuffer.SetData(agents);
         simCS.SetBuffer(simKernel, "agents", agentBuffer); // Remember to return data back to agents after dispatching
+        simCS.SetInt("numAgents", settings.numAgents);
 
 
         // Set other relevant fields in the compute shader
         simCS.SetTexture(simKernel, "Display", displayTexture);
 
         // TODO: delete, this is just for testing purposes
-        int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
-        int threadGroupsY = Mathf.CeilToInt(settings.height / 8.0f);
-        simCS.Dispatch(0, threadGroupsX, threadGroupsY, 1); 
+        // int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
+        // int threadGroupsY = Mathf.CeilToInt(settings.height / 8.0f);
+        int threadGroupsX = Mathf.CeilToInt(settings.numAgents / 16f);
+        simCS.Dispatch(0, threadGroupsX, 1, 1); 
     }
 
     void initRenderTexture(ref RenderTexture texture){
