@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 // Heavily based on Sebastian Lague's slime simulation implementation.
@@ -8,7 +9,7 @@ public class SlimeSimulation : MonoBehaviour
     public ComputeShader simCS;
     public SimulationSettings settings;
 
-    // Kernels are annoying to enum as you have to cast to int
+    // Kernels are annoying to enum as you have to cast enum to int
     public const int simKernel = 0;
 
     public enum SpawnMode {random, inwardsCircle, randomCircle, outwardsCircle};
@@ -21,8 +22,8 @@ public class SlimeSimulation : MonoBehaviour
     protected ComputeBuffer agentBuffer;
 
     public struct Agent {
-        Vector2 position;
-        Vector2 direction;
+        public Vector2 position;
+        public Vector2 direction; // normalized
     }
 
     // Start is called before the first frame update
@@ -38,22 +39,72 @@ public class SlimeSimulation : MonoBehaviour
         initRenderTexture(ref diffuseTexture);
         initRenderTexture(ref displayTexture);
 
-        // Create agents array
+        // Create and initialize agents array
+        // Depending on how long this takes for a large number of agents, it might be worth it to implement in compute shader.
+        // Initializing 5 million agents currently takes around 1 second.
+        
         Agent[] agents = new Agent[settings.numAgents];
+        int agentsLength = agents.Length;
+        float circleRadius = settings.height / 2.5f;
+
+        float beforeSec = System.DateTime.Now.Second;
+        float beforeMs = System.DateTime.Now.Millisecond;
+        for (int i = 0; i < agentsLength; i++){
+            Vector2 pos = new Vector2();
+            Vector2 dir = new Vector2();
+
+            if (settings.spawnMode == SpawnMode.random){
+                // Random position
+                pos.x = Random.value * settings.width;
+                pos.y = Random.value * settings.height;
+                // Random direction
+                dir.x = Random.value - 0.5f;
+                dir.y = Random.value - 0.5f;
+                dir.Normalize();
+            } else if (settings.spawnMode == SpawnMode.inwardsCircle){
+                // Particles start in a circle
+                float rad = (i / agentsLength) * 2 * Mathf.PI;
+                float cos = Mathf.Cos(rad);
+                float sin = Mathf.Sin(rad);
+                pos.x = cos * circleRadius;
+                pos.y = sin * circleRadius;
+                // Particles point towards center
+                dir = Vector2.zero - new Vector2(cos, sin);
+                // TODO: check if these are already normalized
+            } else if (settings.spawnMode == SpawnMode.randomCircle){
+                // Particles start in a circle
+                
+                // Random direction
+                
+            } else if (settings.spawnMode == SpawnMode.outwardsCircle){
+                // Particles start at the center
+                
+                // Particles point outwards
+                
+            }
+
+            agents[i].position = pos;
+            agents[i].direction = dir;
+
+        }
+        float afterSec = System.DateTime.Now.Second;
+        float afterMs = System.DateTime.Now.Millisecond + ((afterSec - beforeSec) * 1000);
+        Debug.Log("Initializing " + settings.numAgents.ToString("#,#") + " agents took " + (afterMs - beforeMs) + " ms / " + (afterMs - beforeMs) / 1000 + " seconds.");
 
         // Set agents buffer in shader
         int stride = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Agent));
-        Debug.Log("Stride: " + stride);
         agentBuffer = new ComputeBuffer(settings.numAgents, stride);
         agentBuffer.SetData(agents);
         simCS.SetBuffer(simKernel, "agents", agentBuffer); // Remember to return data back to agents after dispatching
 
-        // Set other relevant fields in the compute shader
-        simCS.SetTexture(simKernel, "Result", displayTexture);
 
-        // int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
-        // int threadGroupsY = Mathf.CeilToInt(settings.height / 8.0f);
-        // simCS.Dispatch(0, threadGroupsX, threadGroupsY, 1); 
+        // Set other relevant fields in the compute shader
+        simCS.SetTexture(simKernel, "Display", displayTexture);
+
+        // TODO: delete, this is just for testing purposes
+        int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
+        int threadGroupsY = Mathf.CeilToInt(settings.height / 8.0f);
+        simCS.Dispatch(0, threadGroupsX, threadGroupsY, 1); 
     }
 
     void initRenderTexture(ref RenderTexture texture){

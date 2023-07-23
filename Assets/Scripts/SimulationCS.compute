@@ -10,7 +10,7 @@ struct Agent {
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
-RWTexture2D<float4> Result;
+RWTexture2D<float4> Display;
 
 RWStructuredBuffer<Agent> agents;
 uint numAgents;
@@ -19,12 +19,14 @@ float sensorWidth;
 float sensorOffset;
 
 
-[numthreads(8,8,1)]
+[numthreads(16,1,1)]
 void Simulate (uint3 id : SV_DispatchThreadID)
 {
     // TODO: insert actual code here!
+	int posX = (int)agents[id.x].position.x;
+	int posY = (int)agents[id.x].position.y;
+	Display[int2(posX, posY)] = 1;
 
-
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    // Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
 
 }

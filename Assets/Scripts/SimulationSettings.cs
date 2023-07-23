@@ -12,6 +12,7 @@ public class SimulationSettings : ScriptableObject
     // public bool fitToScreen = false; // if true, width and height values are not used
     [Min(1)] 
     public int stepSpeed = 1; // 1 stepSpeed = 50 steps a second
+    public SlimeSimulation.SpawnMode spawnMode;
 
     [Header("Trail Settings")]
 
