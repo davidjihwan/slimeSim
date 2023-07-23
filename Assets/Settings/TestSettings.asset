@@ -16,7 +16,7 @@ MonoBehaviour:
   height: 1080
   numAgents: 1000000
   stepSpeed: 1
-  spawnMode: 0
+  spawnMode: 1
   slimeSettings:
     sensorWidth: 1
     sensorAngle: 30

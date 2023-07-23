@@ -12,7 +12,7 @@ public class SlimeSimulation : MonoBehaviour
     // Kernels are annoying to enum as you have to cast enum to int
     public const int simKernel = 0;
 
-    public enum SpawnMode {random, inwardsCircle, randomCircle, outwardsCircle};
+    public enum SpawnMode {random, inwardsCircle, outwardsCircle, randomCircle, outwardsPoint, randomPoint};
 
     // Seb Lague does a [SerializeField, HideInInspector] here. Has to do with saving, but not sure.
     protected RenderTexture trailTexture;
@@ -53,38 +53,62 @@ public class SlimeSimulation : MonoBehaviour
             Vector2 dir = new Vector2();
 
             if (settings.spawnMode == SpawnMode.random){
+
                 // Random position
                 pos.x = Random.value * settings.width;
                 pos.y = Random.value * settings.height;
                 // Random direction
                 dir.x = Random.value - 0.5f;
                 dir.y = Random.value - 0.5f;
-                dir.Normalize();
+
             } else if (settings.spawnMode == SpawnMode.inwardsCircle){
+
                 // Particles start in a circle
-                float rad = ((float)i / settings.numAgents) * 2f * Mathf.PI;
-                float cos = Mathf.Cos(rad);
-                float sin = Mathf.Sin(rad);
-                pos.x = cos * circleRadius + (settings.width / 2);
-                pos.y = sin * circleRadius + (settings.height / 2);
-                // Particles point towards center
-                dir = Vector2.zero - new Vector2(cos, sin);
-                // TODO: check if these are already normalized
+                
+                // float rad = ((float)i / settings.numAgents) * 2f * Mathf.PI;
+                // float cos = Mathf.Cos(rad);
+                // float sin = Mathf.Sin(rad);
+                // pos.x = cos * circleRadius + (settings.width / 2);
+                // pos.y = sin * circleRadius + (settings.height / 2);
+
+                Vector2 insideCirc = (Random.insideUnitCircle * circleRadius);
+                pos.x = insideCirc.x + (settings.width / 2);
+                pos.y = insideCirc.y + (settings.height / 2);
+                // Particles point inwards
+                dir = Vector2.zero - insideCirc;
+
+            } else if (settings.spawnMode == SpawnMode.outwardsCircle){
+
+                Vector2 insideCirc = (Random.insideUnitCircle * circleRadius);
+                pos.x = insideCirc.x + (settings.width / 2);
+                pos.y = insideCirc.y + (settings.height / 2);
+                // Particles point outwards
+                dir = insideCirc - Vector2.zero;
+
             } else if (settings.spawnMode == SpawnMode.randomCircle){
+
                 // Particles start in a circle
                 
                 // Random direction
                 
-            } else if (settings.spawnMode == SpawnMode.outwardsCircle){
+            } else if (settings.spawnMode == SpawnMode.outwardsPoint){
+
                 // Particles start at the center
                 
                 // Particles point outwards
                 
+            } else if (settings.spawnMode == SpawnMode.randomPoint){
+
+                // Particles start at the center
+                
+                // Random direction 
+            
             } else {
                 Debug.Log("Unaccounted spawn mode");
                 return;
             }
 
+            dir.Normalize();
             agents[i].position = pos;
             agents[i].direction = dir;
 
@@ -108,6 +132,7 @@ public class SlimeSimulation : MonoBehaviour
         // int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
         // int threadGroupsY = Mathf.CeilToInt(settings.height / 8.0f);
         int threadGroupsX = Mathf.CeilToInt(settings.numAgents / 16f);
+        Debug.Log("Thread groups x: " + threadGroupsX);
         simCS.Dispatch(0, threadGroupsX, 1, 1); 
     }
 
