@@ -44,7 +44,7 @@ public class SimulationSettings : ScriptableObject
             slimeSettings.sensorAngle = 30;
             slimeSettings.sensorOffset = 30;
 
-            slimeSettings.moveSpeed = 20;
+            slimeSettings.moveSpeed = 0.01f;
             slimeSettings.turnSpeed = 2;
 
             slimeSettings.color = Color.white;

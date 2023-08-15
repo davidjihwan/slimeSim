@@ -15,7 +15,7 @@ public class SlimeSimulation : MonoBehaviour
     public enum SpawnMode {random, inwardsFullCircle, outwardsFullCircle, randomFullCircle, 
                            inwardsCircle, outwardsPoint, randomPoint};
 
-    // Seb Lague does a [SerializeField, HideInInspector] here. Has to do with saving, but not sure.
+    // Seb Lague does a [SerializeField, HideInInspector] here. Has to do with saving, but not sure of its exact purpose
     protected RenderTexture trailTexture;
     protected RenderTexture diffuseTexture;
     protected RenderTexture displayTexture;
@@ -140,9 +140,25 @@ public class SlimeSimulation : MonoBehaviour
         simCS.SetBuffer(simKernel, "agents", agentBuffer); // Remember to return data back to agents after dispatching
         simCS.SetInt("numAgents", settings.numAgents);
 
+        simCS.SetFloat("sensorAngle", settings.slimeSettings.sensorAngle);
+        simCS.SetFloat("sensorWidth", settings.slimeSettings.sensorWidth);
+        simCS.SetFloat("moveSpeed", settings.slimeSettings.moveSpeed);
+        simCS.SetFloat("turnSpeed", settings.slimeSettings.turnSpeed);
+        Vector4 setColor = settings.slimeSettings.color; // color can be implicitly converted to vec4
+        simCS.SetVector("color", setColor);
 
-        // Set other relevant fields in the compute shader
+    // float sensorAngle;
+    // float sensorWidth;
+    // float sensorOffset;
+    // float moveSpeed;
+    // float turnSpeed;
+    // float3 color;
+
+        // Set texture fields
         simCS.SetTexture(simKernel, "Display", displayTexture);
+        simCS.SetInt("displayHeight", displayTexture.height);
+        simCS.SetInt("displayWidth", displayTexture.width);
+
 
         // TODO: delete, this is just for testing purposes
         // int threadGroupsX = Mathf.CeilToInt(settings.width / 8.0f); 
@@ -174,6 +190,8 @@ public class SlimeSimulation : MonoBehaviour
         for (int i = 0; i < settings.stepSpeed; i++){
             // TODO:
             // Simulate();
+            int threadGroupsX = Mathf.CeilToInt(settings.numAgents / 16f);
+            simCS.Dispatch(0, threadGroupsX, 1, 1); 
         }
     }
 
