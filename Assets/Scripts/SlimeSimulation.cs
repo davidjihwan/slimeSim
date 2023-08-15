@@ -156,8 +156,8 @@ public class SlimeSimulation : MonoBehaviour
 
         // Set texture fields
         simCS.SetTexture(simKernel, "Display", displayTexture);
-        simCS.SetInt("displayHeight", displayTexture.height);
-        simCS.SetInt("displayWidth", displayTexture.width);
+        simCS.SetInt("height", settings.height);
+        simCS.SetInt("width", settings.width);
 
 
         // TODO: delete, this is just for testing purposes

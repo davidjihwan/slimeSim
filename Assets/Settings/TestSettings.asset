@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 1920
   height: 1080
-  numAgents: 1000000
+  numAgents: 10000
   stepSpeed: 1
   spawnMode: 1
   slimeSettings:
     sensorWidth: 1
     sensorAngle: 30
     sensorOffset: 30
-    moveSpeed: 20
+    moveSpeed: 0.01
     turnSpeed: 2
     color: {r: 1, g: 1, b: 1, a: 1}
   useDefaultSlimeSettings: 1
