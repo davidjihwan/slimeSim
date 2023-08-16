@@ -35,16 +35,24 @@ void Simulate (uint3 id : SV_DispatchThreadID)
 
 	// Check if position is valid
 	if (newPos.x > width || newPos.x < 0 || newPos.y > height || newPos.y < 0){
-		// Choose random direction and don't move
-		// TODO:
+		// Bounce
+		if (newPos.x > width || newPos.x < 0){
+			agent.direction = float2(-1 * agent.direction.x, agent.direction.y);
+		} 
+
+		if (newPos.y > height || newPos.y < 0){
+			agent.direction = float2(agent.direction.x, -1 * agent.direction.y);
+		}
+
 	} else {
 		// Move
 		int posX = (int) newPos.x;
 		int posY = (int) newPos.y;
 		Display[int2(posX, posY)] = 1;
 		agent.position = newPos;
-		agents[id.x] = agent;
 	}
+
+	agents[id.x] = agent;
 
     // Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
 

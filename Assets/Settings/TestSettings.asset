@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 1920
   height: 1080
-  numAgents: 10000
+  numAgents: 1000
   stepSpeed: 1
   spawnMode: 3
   slimeSettings:
