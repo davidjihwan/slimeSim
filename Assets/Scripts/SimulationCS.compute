@@ -3,7 +3,7 @@
 
 struct Agent {
 	float2 position;
-	float angle;
+	float2 direction;
 };
 
 // Create a RenderTexture with enableRandomWrite flag and set it
@@ -31,7 +31,7 @@ void Simulate (uint3 id : SV_DispatchThreadID)
 	}
 
 	Agent agent = agents[id.x];
-	float2 newPos = agent.position + moveSpeed * agent.angle;
+	float2 newPos = agent.position + moveSpeed * agent.direction;
 
 	// Check if position is valid
 	if (newPos.x > width || newPos.y > height){
