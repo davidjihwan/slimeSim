@@ -9,8 +9,8 @@ struct Agent {
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Display;
-int height;
-int width;
+uint height;
+uint width;
 
 // Agent settings
 RWStructuredBuffer<Agent> agents;
@@ -34,7 +34,7 @@ void Simulate (uint3 id : SV_DispatchThreadID)
 	float2 newPos = agent.position + moveSpeed * agent.direction;
 
 	// Check if position is valid
-	if (newPos.x > width || newPos.y > height){
+	if (newPos.x > width || newPos.x < 0 || newPos.y > height || newPos.y < 0){
 		// Choose random direction and don't move
 		// TODO:
 	} else {
@@ -43,6 +43,7 @@ void Simulate (uint3 id : SV_DispatchThreadID)
 		int posY = (int) newPos.y;
 		Display[int2(posX, posY)] = 1;
 		agent.position = newPos;
+		agents[id.x] = agent;
 	}
 
     // Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
