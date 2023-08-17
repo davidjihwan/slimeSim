@@ -41,8 +41,8 @@ public class SlimeSimulation : MonoBehaviour
         initRenderTexture(ref displayTexture);
 
         // Create and initialize agents array
-        // Depending on how long this takes for a large number of agents, it might be worth it to implement in compute shader.
-        // Initializing 5 million agents currently takes around 1 second.
+        // For agent count > 20 million, it might be worth it to implement in compute shader.
+        // Initializing 10 million agents currently takes around 2 seconds.
         
         Agent[] agents = new Agent[settings.numAgents];
         float circleRadius = settings.height / 2.5f;
